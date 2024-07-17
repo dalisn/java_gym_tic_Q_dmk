@@ -1,10 +1,13 @@
 import java.util.Scanner;
+import java.util.List; 
 import gym.UserManager;
 import gym.SessionManager;
 import gym.User;
 import gym.CourseManager;
+import gym.MessageManager;
+import gym.Message; 
 import gym.FitnessClass;
-import java.util.List;
+
 
 public class Main {
     public static void main(String[] args) {
@@ -12,6 +15,7 @@ public class Main {
         UserManager userManager = new UserManager();
         SessionManager sessionManager = SessionManager.getInstance();
         CourseManager courseManager = new CourseManager();
+        MessageManager messageManager = new MessageManager();
         int choice;
 
         while (true) {
@@ -24,10 +28,10 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    adminMenu(scanner, userManager, courseManager);
+                    adminMenu(scanner, userManager, courseManager, messageManager);
                     break;
                 case 2:
-                    userMenu(scanner, userManager, sessionManager, courseManager);
+                    userMenu(scanner, userManager, sessionManager, courseManager, messageManager);
                     break;
                 case 3:
                     System.out.println("Exiting...");
@@ -39,7 +43,7 @@ public class Main {
         }
     }
 
-    public static void adminMenu(Scanner scanner, UserManager userManager, CourseManager courseManager) {
+    public static void adminMenu(Scanner scanner, UserManager userManager, CourseManager courseManager, MessageManager messageManager) {
         System.out.print("Enter admin username: ");
         String username = scanner.next();
         System.out.print("Enter admin password: ");
@@ -54,8 +58,9 @@ public class Main {
                 System.out.println("4. Delete a Course");
                 System.out.println("5. Update Course Details");
                 System.out.println("6. Delete a User");
-                System.out.println("7. Logout");
-                System.out.print("Please select an option (1-7): ");
+                System.out.println("7. View Messages");
+                System.out.println("8. Logout");
+                System.out.print("Please select an option (1-8): ");
                 int choice = scanner.nextInt();
 
                 switch (choice) {
@@ -78,6 +83,9 @@ public class Main {
                         deleteUser(scanner, userManager, courseManager);
                         break;
                     case 7:
+                        viewMessages(scanner, messageManager);
+                        break;
+                    case 8:
                         System.out.println("Admin logged out successfully.");
                         return;
                     default:
@@ -89,7 +97,7 @@ public class Main {
         }
     }
 
-    public static void userMenu(Scanner scanner, UserManager userManager, SessionManager sessionManager, CourseManager courseManager) {
+    public static void userMenu(Scanner scanner, UserManager userManager, SessionManager sessionManager, CourseManager courseManager, MessageManager messageManager) {
         int choice;
 
         while (true) {
@@ -104,7 +112,7 @@ public class Main {
                 case 1:
                     String sessionId = loginUser(scanner, userManager, sessionManager);
                     if (sessionId != null) {
-                        userSessionMenu(scanner, sessionManager, courseManager, userManager, sessionId);
+                        userSessionMenu(scanner, sessionManager, courseManager, userManager, messageManager, sessionId);
                     }
                     break;
                 case 2:
@@ -148,10 +156,10 @@ public class Main {
         userManager.signUpUser(name, email, password);
     }
 
-    public static void userSessionMenu(Scanner scanner, SessionManager sessionManager, CourseManager courseManager, UserManager userManager, String sessionId) {
+    public static void userSessionMenu(Scanner scanner, SessionManager sessionManager, CourseManager courseManager, UserManager userManager, MessageManager messageManager, String sessionId) {
         int choice;
         User user = sessionManager.getUserBySessionId(sessionId);
-
+    
         while (true) {
             System.out.println("User Session Menu");
             System.out.println("1. View Available Courses");
@@ -159,10 +167,12 @@ public class Main {
             System.out.println("3. Discard from a Course");
             System.out.println("4. View Registered Courses");
             System.out.println("5. Update Account Information");
-            System.out.println("6. Logout");
-            System.out.print("Please select an option (1-6): ");
+            System.out.println("6. Send Message to Admin");
+            System.out.println("7. View Messages and Responses");
+            System.out.println("8. Logout");
+            System.out.print("Please select an option (1-8): ");
             choice = scanner.nextInt();
-
+    
             switch (choice) {
                 case 1:
                     viewAvailableCourses(courseManager);
@@ -180,6 +190,12 @@ public class Main {
                     updateAccountInformation(scanner, userManager, user);
                     break;
                 case 6:
+                    sendMessage(scanner, messageManager, user);
+                    break;
+                case 7:
+                    viewUserMessages(scanner, messageManager, user);
+                    break;
+                case 8:
                     sessionManager.removeSession(sessionId);
                     System.out.println("User logged out successfully.");
                     return;
@@ -188,7 +204,7 @@ public class Main {
             }
         }
     }
-
+    
     public static void viewAndControlUsers(Scanner scanner, UserManager userManager) {
         System.out.println("All Users:");
         for (User user : userManager.getAllUsers()) {
@@ -300,4 +316,39 @@ public class Main {
             System.out.println("User not found.");
         }
     }
+
+    public static void sendMessage(Scanner scanner, MessageManager messageManager, User user) {
+        System.out.println("Send Message to Admin");
+        scanner.nextLine(); // Consume newline left-over
+        System.out.print("Enter your message: ");
+        String content = scanner.nextLine();
+        messageManager.sendMessage(user.getEmail(), content);
+        System.out.println("Message sent successfully.");
+    }
+
+    public static void viewMessages(Scanner scanner, MessageManager messageManager) {
+        System.out.println("All Messages:");
+        List<Message> messages = messageManager.getAllMessages();
+        for (Message message : messages) {
+            System.out.println("ID: " + message.getId() + ", Sender: " + message.getSender() + ", Content: " + message.getContent() + ", Response: " + message.getResponse());
+        }
+        System.out.print("Enter the ID of the message you want to respond to: ");
+        int messageId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline left-over
+        System.out.print("Enter your response: ");
+        String response = scanner.nextLine();
+        messageManager.respondToMessage(messageId, response);
+        System.out.println("Response sent successfully.");
+    }
+
+    public static void viewUserMessages(Scanner scanner, MessageManager messageManager, User user) {
+        System.out.println("Your Messages and Admin Responses:");
+        List<Message> messages = messageManager.getAllMessages();
+        for (Message message : messages) {
+            if (message.getSender().equals(user.getEmail())) {
+                System.out.println("ID: " + message.getId() + ", Content: " + message.getContent() + ", Response: " + (message.getResponse().isEmpty() ? "No response yet" : message.getResponse()));
+            }
+        }
+    }
+    
 }
