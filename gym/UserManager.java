@@ -42,6 +42,32 @@ public class UserManager {
         return users.values();
     }
 
+    public void updateUser(String email, String newName, String newEmail, String newPassword) {
+        User user = users.get(email);
+        if (user != null) {
+            user.setName(newName);
+            user.setEmail(newEmail);
+            user.setPassword(newPassword);
+            users.remove(email);
+            users.put(newEmail, user);
+            saveUsers();
+            System.out.println("User information updated successfully.");
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
+    public void deleteUser(String email) {
+        User user = users.get(email);
+        if (user != null) {
+            users.remove(email);
+            saveUsers();
+            System.out.println("User deleted successfully.");
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
     private void loadUsers() {
         try (BufferedReader br = new BufferedReader(new FileReader(USER_FILE))) {
             String line;

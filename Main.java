@@ -1,10 +1,10 @@
-import java.util.List;
 import java.util.Scanner;
 import gym.UserManager;
 import gym.SessionManager;
 import gym.User;
 import gym.CourseManager;
 import gym.FitnessClass;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -53,8 +53,9 @@ public class Main {
                 System.out.println("3. Add New Course");
                 System.out.println("4. Delete a Course");
                 System.out.println("5. Update Course Details");
-                System.out.println("6. Logout");
-                System.out.print("Please select an option (1-6): ");
+                System.out.println("6. Delete a User");
+                System.out.println("7. Logout");
+                System.out.print("Please select an option (1-7): ");
                 int choice = scanner.nextInt();
 
                 switch (choice) {
@@ -74,6 +75,9 @@ public class Main {
                         updateCourseDetails(scanner, courseManager);
                         break;
                     case 6:
+                        deleteUser(scanner, userManager, courseManager);
+                        break;
+                    case 7:
                         System.out.println("Admin logged out successfully.");
                         return;
                     default:
@@ -100,7 +104,7 @@ public class Main {
                 case 1:
                     String sessionId = loginUser(scanner, userManager, sessionManager);
                     if (sessionId != null) {
-                        userSessionMenu(scanner, sessionManager, courseManager, sessionId);
+                        userSessionMenu(scanner, sessionManager, courseManager, userManager, sessionId);
                     }
                     break;
                 case 2:
@@ -144,7 +148,7 @@ public class Main {
         userManager.signUpUser(name, email, password);
     }
 
-    public static void userSessionMenu(Scanner scanner, SessionManager sessionManager, CourseManager courseManager, String sessionId) {
+    public static void userSessionMenu(Scanner scanner, SessionManager sessionManager, CourseManager courseManager, UserManager userManager, String sessionId) {
         int choice;
         User user = sessionManager.getUserBySessionId(sessionId);
 
@@ -154,8 +158,9 @@ public class Main {
             System.out.println("2. Register for a Course");
             System.out.println("3. Discard from a Course");
             System.out.println("4. View Registered Courses");
-            System.out.println("5. Logout");
-            System.out.print("Please select an option (1-5): ");
+            System.out.println("5. Update Account Information");
+            System.out.println("6. Logout");
+            System.out.print("Please select an option (1-6): ");
             choice = scanner.nextInt();
 
             switch (choice) {
@@ -172,6 +177,9 @@ public class Main {
                     viewRegisteredCourses(courseManager, user);
                     break;
                 case 5:
+                    updateAccountInformation(scanner, userManager, user);
+                    break;
+                case 6:
                     sessionManager.removeSession(sessionId);
                     System.out.println("User logged out successfully.");
                     return;
@@ -265,6 +273,31 @@ public class Main {
             for (FitnessClass course : userCourses) {
                 System.out.println(course.getId() + ". " + course.getName() + " - " + course.getSchedule() + " - Instructor: " + course.getInstructor());
             }
+        }
+    }
+
+    public static void updateAccountInformation(Scanner scanner, UserManager userManager, User user) {
+        System.out.println("Update Account Information");
+        System.out.print("Enter new name: ");
+        String newName = scanner.next();
+        System.out.print("Enter new email: ");
+        String newEmail = scanner.next();
+        System.out.print("Enter new password: ");
+        String newPassword = scanner.next();
+
+        userManager.updateUser(user.getEmail(), newName, newEmail, newPassword);
+    }
+
+    public static void deleteUser(Scanner scanner, UserManager userManager, CourseManager courseManager) {
+        System.out.print("Enter the email of the user you want to delete: ");
+        String email = scanner.next();
+        User user = userManager.getUserByEmail(email);
+        if (user != null) {
+            courseManager.removeUserFromAllCourses(user);
+            userManager.deleteUser(email);
+            System.out.println("User and their course registrations deleted successfully.");
+        } else {
+            System.out.println("User not found.");
         }
     }
 }

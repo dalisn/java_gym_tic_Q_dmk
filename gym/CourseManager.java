@@ -108,4 +108,13 @@ public class CourseManager {
         }
         return userCourses;
     }
+
+    public void removeUserFromAllCourses(User user) {
+        for (FitnessClass course : courses) {
+            if (course.isUserRegistered(user)) {
+                course.cancelRegistration(user);
+            }
+        }
+        saveCourses();
+    }
 }

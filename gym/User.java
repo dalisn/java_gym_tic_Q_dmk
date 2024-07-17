@@ -13,21 +13,6 @@ public class User {
         this.password = password;
     }
 
-    public void createAccount() {
-        // Logic to create a user account
-    }
-
-    public void updateAccount(String name, String email) {
-        this.name = name;
-        this.email = email;
-        // Logic to update the account in the database
-    }
-
-    public void changePassword(String newPassword) {
-        this.password = newPassword;
-        // Logic to change the password in the database
-    }
-
     public int getId() {
         return id;
     }
@@ -44,5 +29,17 @@ public class User {
         return password;
     }
 
-    // Setters can be added if needed
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // Other methods (createAccount, updateAccount, changePassword) can be added here if needed
 }
