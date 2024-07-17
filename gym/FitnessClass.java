@@ -1,15 +1,11 @@
 package gym;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class FitnessClass {
     private int id;
     private String name;
     private String schedule;
     private String instructor;
     private int availableSlots;
-    private Set<User> registeredUsers;
 
     public FitnessClass(int id, String name, String schedule, String instructor, int availableSlots) {
         this.id = id;
@@ -17,7 +13,6 @@ public class FitnessClass {
         this.schedule = schedule;
         this.instructor = instructor;
         this.availableSlots = availableSlots;
-        this.registeredUsers = new HashSet<>();
     }
 
     public int getId() {
@@ -54,27 +49,5 @@ public class FitnessClass {
 
     public void setAvailableSlots(int availableSlots) {
         this.availableSlots = availableSlots;
-    }
-
-    public void registerUser(User user) {
-        if (availableSlots > 0 && registeredUsers.add(user)) {
-            availableSlots--;
-            System.out.println(user.getName() + " registered for " + name + ".");
-        } else {
-            System.out.println("No available slots or user already registered.");
-        }
-    }
-
-    public void cancelRegistration(User user) {
-        if (registeredUsers.remove(user)) {
-            availableSlots++;
-            System.out.println(user.getName() + " removed from " + name + ".");
-        } else {
-            System.out.println("User not registered in this class.");
-        }
-    }
-
-    public boolean isUserRegistered(User user) {
-        return registeredUsers.contains(user);
     }
 }

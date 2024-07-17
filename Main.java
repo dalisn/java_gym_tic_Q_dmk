@@ -1,17 +1,19 @@
+import gym.DatabaseInitializer;
 import java.util.Scanner;
-import java.util.List; 
+import java.util.List;
 import gym.UserManager;
 import gym.SessionManager;
 import gym.User;
 import gym.CourseManager;
 import gym.MessageManager;
-import gym.Message; 
+import gym.Message;
 import gym.FitnessClass;
 
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        DatabaseInitializer.initializeDatabase();
         UserManager userManager = new UserManager();
         SessionManager sessionManager = SessionManager.getInstance();
         CourseManager courseManager = new CourseManager();

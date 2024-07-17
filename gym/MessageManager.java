@@ -1,71 +1,53 @@
 package gym;
 
-import java.io.*;
+import java.sql.*;
 import java.util.*;
 
 public class MessageManager {
-    private static final String MESSAGE_FILE = "messages.txt";
-    private List<Message> messages;
+    private static final String DB_URL = "jdbc:sqlite:gym.db";
 
     public MessageManager() {
-        messages = new ArrayList<>();
-        loadMessages();
+        DatabaseInitializer.initializeDatabase();
     }
 
     public void sendMessage(String sender, String content) {
-        int id = messages.size() + 1;
-        Message message = new Message(id, sender, content, "");
-        messages.add(message);
-        saveMessages();
+        String sql = "INSERT INTO messages(sender, content, response) VALUES(?, ?, '')";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, sender);
+            pstmt.setString(2, content);
+            pstmt.executeUpdate();
+            System.out.println("Message sent successfully.");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public List<Message> getAllMessages() {
+        String sql = "SELECT * FROM messages";
+        List<Message> messages = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                messages.add(new Message(rs.getInt("id"), rs.getString("sender"), rs.getString("content"), rs.getString("response")));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
         return messages;
     }
 
-    public Message getMessageById(int id) {
-        for (Message message : messages) {
-            if (message.getId() == id) {
-                return message;
-            }
-        }
-        return null;
-    }
-
     public void respondToMessage(int id, String response) {
-        Message message = getMessageById(id);
-        if (message != null) {
-            message.setResponse(response);
-            saveMessages();
-        }
-    }
-
-    private void loadMessages() {
-        try (BufferedReader br = new BufferedReader(new FileReader(MESSAGE_FILE))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    int id = Integer.parseInt(parts[0]);
-                    String sender = parts[1];
-                    String content = parts[2];
-                    String response = parts[3];
-                    messages.add(new Message(id, sender, content, response));
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("No messages file found. Starting fresh.");
-        }
-    }
-
-    private void saveMessages() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(MESSAGE_FILE))) {
-            for (Message message : messages) {
-                bw.write(message.getId() + "," + message.getSender() + "," + message.getContent() + "," + message.getResponse());
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        String sql = "UPDATE messages SET response = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, response);
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
+            System.out.println("Response sent successfully.");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

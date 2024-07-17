@@ -40,6 +40,4 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    // Other methods (createAccount, updateAccount, changePassword) can be added here if needed
 }
