@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Scanner;
 import gym.UserManager;
 import gym.SessionManager;
@@ -152,8 +153,9 @@ public class Main {
             System.out.println("1. View Available Courses");
             System.out.println("2. Register for a Course");
             System.out.println("3. Discard from a Course");
-            System.out.println("4. Logout");
-            System.out.print("Please select an option (1-4): ");
+            System.out.println("4. View Registered Courses");
+            System.out.println("5. Logout");
+            System.out.print("Please select an option (1-5): ");
             choice = scanner.nextInt();
 
             switch (choice) {
@@ -167,6 +169,9 @@ public class Main {
                     discardFromCourse(scanner, courseManager, user);
                     break;
                 case 4:
+                    viewRegisteredCourses(courseManager, user);
+                    break;
+                case 5:
                     sessionManager.removeSession(sessionId);
                     System.out.println("User logged out successfully.");
                     return;
@@ -248,6 +253,18 @@ public class Main {
             System.out.println("Successfully discarded from the course.");
         } else {
             System.out.println("Failed to discard from the course. You may not be registered in it.");
+        }
+    }
+
+    public static void viewRegisteredCourses(CourseManager courseManager, User user) {
+        System.out.println("Registered Courses:");
+        List<FitnessClass> userCourses = courseManager.getUserCourses(user);
+        if (userCourses.isEmpty()) {
+            System.out.println("You are not registered for any courses.");
+        } else {
+            for (FitnessClass course : userCourses) {
+                System.out.println(course.getId() + ". " + course.getName() + " - " + course.getSchedule() + " - Instructor: " + course.getInstructor());
+            }
         }
     }
 }

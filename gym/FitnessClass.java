@@ -73,4 +73,8 @@ public class FitnessClass {
             System.out.println("User not registered in this class.");
         }
     }
+
+    public boolean isUserRegistered(User user) {
+        return registeredUsers.contains(user);
+    }
 }

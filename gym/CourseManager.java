@@ -98,4 +98,14 @@ public class CourseManager {
             saveCourses();
         }
     }
+
+    public List<FitnessClass> getUserCourses(User user) {
+        List<FitnessClass> userCourses = new ArrayList<>();
+        for (FitnessClass course : courses) {
+            if (course.isUserRegistered(user)) {
+                userCourses.add(course);
+            }
+        }
+        return userCourses;
+    }
 }
